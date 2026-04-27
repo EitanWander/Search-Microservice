@@ -33,8 +33,14 @@ async def get_search_results(filters=None):
 
     tag_ids = filters.get("tag_ids")
     search = filters.get("search")
+    import datetime
     start_date = filters.get("start_date")
     end_date = filters.get("end_date")
+    # Convert string dates to datetime.date objects if present
+    if start_date:
+        start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
+    if end_date:
+        end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d").date()
 
     query = """
         SELECT
