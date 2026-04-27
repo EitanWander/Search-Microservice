@@ -7,7 +7,7 @@ load_dotenv()
 DB_USER = os.getenv("DB_USER", "testuser")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "testpass")
 DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = int(os.getenv("DB_PORT", "5433"))
+DB_PORT = int(os.getenv("DB_PORT", "5432"))
 DB_NAME = os.getenv("DB_NAME", "my_app_db")
 
 pool = None
@@ -33,6 +33,8 @@ async def get_search_results(filters=None):
 
     tag_ids = filters.get("tag_ids")
     search = filters.get("search")
+    start_date = filters.get("start_date")
+    end_date = filters.get("end_date")
 
     query = """
         SELECT
@@ -64,6 +66,14 @@ async def get_search_results(filters=None):
     if search:
         conditions.append(f"(ki.title ILIKE ${len(values) + 1} OR ki.content ILIKE ${len(values) + 1})")
         values.append(f"%{search}%")
+
+    # Date filtering
+    if start_date:
+        conditions.append(f"ki.created_at >= ${len(values) + 1}")
+        values.append(start_date)
+    if end_date:
+        conditions.append(f"ki.created_at <= ${len(values) + 1}")
+        values.append(end_date)
 
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
